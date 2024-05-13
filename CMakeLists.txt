@@ -33,7 +33,7 @@ if(MSVC AND BUILD_SHARED_LIBS)
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared library instead of static library (not available on MSVC)" FORCE)
 endif()
 
-add_library(urg STATIC
+add_library(urg_obj OBJECT
     src/urg_connection.c
     src/urg_debug.c
     src/urg_ring_buffer.c
@@ -47,6 +47,21 @@ add_library(urg STATIC
     src/urg_tcpclient.c
     src/urg_utils.c
 )
+target_include_directories(urg_obj
+    PRIVATE src
+    #PUBLIC include/c
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/c>
+        $<INSTALL_INTERFACE:include/urglib/c>
+)
+if(MSVC)
+    target_link_libraries(urg_obj
+        INTERFACE ws2_32
+        INTERFACE SetupAPI
+    )
+endif()
+
+add_library(urg STATIC $<TARGET_OBJECTS:urg_obj>)
 target_include_directories(urg
     PRIVATE src
     #PUBLIC include/c
@@ -62,6 +77,7 @@ if(MSVC)
 endif()
 
 add_library(urg_cpp STATIC
+    $<TARGET_OBJECTS:urg_obj>
     src/Urg_driver.cpp
     src/ticks.cpp
 )
@@ -77,6 +93,7 @@ target_include_directories(urg_cpp
         $<INSTALL_INTERFACE:include/urglib/cpp>
 )
 
+set_target_properties(urg_obj PROPERTIES FOLDER "Libraries")
 set_target_properties(urg PROPERTIES FOLDER "Libraries")
 set_target_properties(urg_cpp PROPERTIES FOLDER "Libraries")
 
