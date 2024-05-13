@@ -23,8 +23,15 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 set(CMAKE_DEBUG_POSTFIX _d)
 
+
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared library instead of static library (not available on MSVC)")
 set(BUILD_SAMPLES_C OFF CACHE BOOL "Build C examples")
 set(BUILD_SAMPLES_CPP OFF CACHE BOOL "Build CPP examples")
+
+if(MSVC AND BUILD_SHARED_LIBS)
+    message(SEND_ERROR "Shared library is not available on MSVC.")
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared library instead of static library (not available on MSVC)" FORCE)
+endif()
 
 add_library(urg STATIC
     src/urg_connection.c
@@ -45,7 +52,7 @@ target_include_directories(urg
     #PUBLIC include/c
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/c>
-        $<INSTALL_INTERFACE:include/c>
+        $<INSTALL_INTERFACE:include/urglib/c>
 )
 if(MSVC)
     target_link_libraries(urg
@@ -67,7 +74,7 @@ target_include_directories(urg_cpp
     #PUBLIC include/cpp
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/cpp>
-        $<INSTALL_INTERFACE:include/cpp>
+        $<INSTALL_INTERFACE:include/urglib/cpp>
 )
 
 set_target_properties(urg PROPERTIES FOLDER "Libraries")
@@ -194,5 +201,5 @@ install(EXPORT urg_cpp-export
 
 install(DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}/include/
-    DESTINATION include
+    DESTINATION include/urglib
 )
