@@ -12,7 +12,7 @@
 # https://opensource.org/license/mit
 ###
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.10)
 
 project(urglib)
 
@@ -81,8 +81,9 @@ add_library(urg_cpp STATIC
     src/Urg_driver.cpp
     src/ticks.cpp
 )
+add_dependencies(urg_cpp urg)
 target_link_libraries(urg_cpp
-    PRIVATE urg
+    PUBLIC urg
 )
 target_include_directories(urg_cpp
     PRIVATE src
@@ -197,21 +198,18 @@ if(BUILD_SAMPLES_CPP)
 endif()
 
 install(TARGETS urg
-    EXPORT urg-export
+    EXPORT urglib-export
     LIBRARY DESTINATION lib
+    PUBLIC_HEADER DESTINATION include
 )
-install(EXPORT urg-export
-    FILE urg-config.cmake
-    DESTINATION cmake
-    EXPORT_LINK_INTERFACE_LIBRARIES
-)
-
 install(TARGETS urg_cpp
-    EXPORT urg_cpp-export
+    EXPORT urglib-export
     LIBRARY DESTINATION lib
+    PUBLIC_HEADER DESTINATION include
 )
-install(EXPORT urg_cpp-export
-    FILE urg_cpp-config.cmake
+install(EXPORT urglib-export
+    NAMESPACE urglib::
+    FILE urglib-config.cmake
     DESTINATION cmake
     EXPORT_LINK_INTERFACE_LIBRARIES
 )
@@ -220,3 +218,4 @@ install(DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}/include/
     DESTINATION include/urglib
 )
+
